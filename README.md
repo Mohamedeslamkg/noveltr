@@ -27,9 +27,20 @@ A Python script to find Telegram channel links from specified web sources and se
     ```bash
     python -m venv venv
     source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+    Before installing requirements, it's good practice to ensure `pip` is up to date:
+    ```bash
+    pip install --upgrade pip
+    ```
+    Then install the project dependencies:
+    ```bash
     pip install -r requirements.txt 
     ```
-    (Note: `requirements.txt` includes `discord.py[without_voice]` for the bot and `requests` for both script and bot.)
+    (Note: `requirements.txt` includes `discord.py[without_voice]==2.0.0` for the bot and `requests` for both script and bot.)
+    If you encounter issues, especially related to `discord.py` or `audioop` (see Troubleshooting section), you might need a cleaner install:
+    ```bash
+    pip install -r requirements.txt --force-reinstall --no-cache-dir
+    ```
 
 3.  **Configure the project (`config.json`):**
     - Open `config.json` (located in the root of the project) and replace the placeholder values. This file is used by both the standalone script and the Discord bot.
@@ -131,16 +142,31 @@ Found links from these automatic scans are posted to the channel specified by `o
 
 ### `ModuleNotFoundError: No module named 'audioop'`
 
-If you encounter this error when running `discord_bot.py`, it means that a system library (`audioop`) required for Discord voice functionality is not available in your Python environment.
+If you encounter this error when running `discord_bot.py`, it means that a system library (`audioop`) required for Discord voice functionality is not available in your Python environment. This project does not use Discord voice features.
 
-This project does not use Discord voice features. To resolve this, `requirements.txt` has been configured to install `discord.py` without voice support using `discord.py[without_voice]`.
+To attempt to resolve this, `requirements.txt` has been configured to use `discord.py[without_voice]==2.0.0`. This is an older version of the library that may interact differently with problematic Python environments.
 
-If you are encountering this error after a previous installation, please ensure you have the latest dependencies by running:
+**Crucial Steps to Apply This Fix:**
 
-```bash
-pip install -r requirements.txt --force-reinstall
-```
-This will reinstall the packages as specified in `requirements.txt`, including `discord.py` without the voice components.
+1.  **Update pip:**
+    ```bash
+    pip install --upgrade pip
+    ```
+2.  **Manually Remove Old Package Files:** You *must* ensure old `discord.py` files are gone. Delete the following directories if they exist (adjust path if your Python user site-packages directory is different, e.g., for different Python versions or operating systems):
+    *   `~/.local/lib/pythonX.Y/site-packages/discord/` (replace X.Y with your Python version like 3.9, 3.10, 3.11, 3.12, 3.13 etc.)
+    *   `~/.local/lib/pythonX.Y/site-packages/discord.py-*.dist-info/` (any folder starting with `discord.py-` and ending in `.dist-info` for your Python version)
+    *   If using a virtual environment, the path would be like: `venv/lib/pythonX.Y/site-packages/discord/` and `venv/lib/pythonX.Y/site-packages/discord.py-*.dist-info/`.
+3.  **Reinstall Dependencies from Scratch:**
+    ```bash
+    pip install -r requirements.txt --force-reinstall --no-cache-dir
+    ```
+This ensures that the specific version without voice components is installed cleanly.
+
+**Important Note on Environment Limitations:**
+
+If you have followed all the above steps meticulously (using `discord.py[without_voice]==2.0.0`, upgrading pip, deleting old package directories, and reinstalling with `--force-reinstall --no-cache-dir`) and the `ModuleNotFoundError: No module named 'audioop'` *still* persists, the issue is very likely specific to the Python environment provided by your hosting platform (e.g., "Silly Development"). 
+
+Such problems can arise from how Python is built or configured on the platform, or specific interactions with Python 3.13 and `discord.py`. Resolving it may require seeking support from your hosting provider or consulting their documentation for Python environment troubleshooting, as it likely falls outside what can be fixed within this project's code.
 
 ## Core Logic (`utils.py`)
 
@@ -150,7 +176,7 @@ Both the standalone script and the Discord bot use the `find_telegram_links` fun
 
 - Python 3.x
 - `requests`: For making HTTP requests (used by `utils.py`).
-- `discord.py[without_voice]`: For the Discord bot functionality (installed without voice support).
+- `discord.py[without_voice]==2.0.0`: For the Discord bot functionality (installed without voice support).
 
 (These are listed in `requirements.txt`)
 
