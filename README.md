@@ -29,7 +29,7 @@ A Python script to find Telegram channel links from specified web sources and se
     source venv/bin/activate  # On Windows use `venv\Scripts\activate`
     pip install -r requirements.txt 
     ```
-    (Note: `requirements.txt` includes `discord.py` for the bot and `requests` for both script and bot.)
+    (Note: `requirements.txt` includes `discord.py[without_voice]` for the bot and `requests` for both script and bot.)
 
 3.  **Configure the project (`config.json`):**
     - Open `config.json` (located in the root of the project) and replace the placeholder values. This file is used by both the standalone script and the Discord bot.
@@ -127,6 +127,21 @@ The bot is configured to automatically scan all sources periodically.
 *   For production use, you should change `@tasks.loop(minutes=5)` to a longer interval, such as `@tasks.loop(hours=24)` for daily scans.
 Found links from these automatic scans are posted to the channel specified by `output_channel_id`.
 
+## Troubleshooting
+
+### `ModuleNotFoundError: No module named 'audioop'`
+
+If you encounter this error when running `discord_bot.py`, it means that a system library (`audioop`) required for Discord voice functionality is not available in your Python environment.
+
+This project does not use Discord voice features. To resolve this, `requirements.txt` has been configured to install `discord.py` without voice support using `discord.py[without_voice]`.
+
+If you are encountering this error after a previous installation, please ensure you have the latest dependencies by running:
+
+```bash
+pip install -r requirements.txt --force-reinstall
+```
+This will reinstall the packages as specified in `requirements.txt`, including `discord.py` without the voice components.
+
 ## Core Logic (`utils.py`)
 
 Both the standalone script and the Discord bot use the `find_telegram_links` function located in `utils.py`. This function is responsible for fetching web content and extracting Telegram links using regular expressions.
@@ -135,7 +150,7 @@ Both the standalone script and the Discord bot use the `find_telegram_links` fun
 
 - Python 3.x
 - `requests`: For making HTTP requests (used by `utils.py`).
-- `discord.py`: For the Discord bot functionality.
+- `discord.py[without_voice]`: For the Discord bot functionality (installed without voice support).
 
 (These are listed in `requirements.txt`)
 
